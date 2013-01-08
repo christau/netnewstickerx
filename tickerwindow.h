@@ -2,6 +2,7 @@
 #define TICKERWINDOW_H
 
 #include <QMainWindow>
+#include <QGLWidget>
 #include <QMouseEvent>
 #include <QTimer>
 
@@ -10,7 +11,7 @@ namespace Ui {
 class TickerWindow;
 }
 
-class TickerWindow : public QMainWindow
+class TickerWindow : public QGLWidget
 {
     Q_OBJECT
     
@@ -22,6 +23,9 @@ public slots:
     void feedsUpdated();
 
 protected:
+    void initializeGL();
+    void resizeGL(int w, int h);
+    void paintGL();
     void mouseMoveEvent(QMouseEvent* event);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
@@ -34,6 +38,7 @@ private:
 
 private slots:
     void animate();
+
 };
 
 #endif // TICKERWINDOW_H

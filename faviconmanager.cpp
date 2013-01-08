@@ -15,7 +15,7 @@ FavIconManager::~FavIconManager()
 void FavIconManager::cacheFavIcon(QString url)
 {
     QUrl url1("http://10.10.10.40/favicon.ico");
-    QNetworkRequest request(url1);
+    QNetworkRequest request(url);
 
     m_reply = m_manager->get(request);
 

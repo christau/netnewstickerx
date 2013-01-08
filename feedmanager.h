@@ -14,11 +14,15 @@ class FeedManager : public QObject
 {
     Q_OBJECT
 public:
+    static FeedManager* getInstance();
+
+private:
     explicit FeedManager(QObject *parent = 0);
     /**
      * @brief triggers to read the passed rss fedds. If finished, the signal feedsLoaded() is emitted
      * @param urls a list of RSS urls
      */
+public:
     void setSubscriptions( const QStringList &urls );
     const QMap<QUrl, Feed*> & availableFeeds() const;
     
@@ -33,6 +37,7 @@ private:
     QMap<int, QUrl> m_scanIDs;
     QHttp m_http;
     void parseXml(Feed* feed, QByteArray content);
+    static FeedManager* m_instance;
     
 };
 

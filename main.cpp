@@ -12,16 +12,18 @@ int main(int argc, char *argv[])
     TickerWindow w;
     w.show();
 
- /*   QNetworkProxy proxy;
-     proxy.setType(QNetworkProxy::HttpProxy);
+/*    QNetworkProxy proxy;
+     proxy.setType(QNetworkProxy::HttpCachingProxy);
      proxy.setHostName("10.10.10.80");
      proxy.setPort(3128);
-     QNetworkProxy::setApplicationProxy(proxy);
+     QNetworkProxy::setApplicationProxy(proxy);*/
      QNetworkProxyFactory::setUseSystemConfiguration(true);
-*/
-    //FavIconManager* m = new FavIconManager();
-    //m->getFavIcon("");
-    FeedManager* f=new FeedManager();
+
+    FavIconManager* m = new FavIconManager();
+    m->cacheFavIcon("http://www.spiegel.de/favicon.ico");
+
+
+    FeedManager* f=FeedManager::getInstance();
     QStringList s;
     s<<"http://www.spiegel.de/schlagzeilen/tops/index.rss";
     //s<<"http://www.heise.de/newsticker/heise-atom.xml";

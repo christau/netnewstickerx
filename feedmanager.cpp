@@ -2,9 +2,21 @@
 
 #include <QDebug>
 
+FeedManager* FeedManager::m_instance = 0;
+
+FeedManager* FeedManager::getInstance()
+{
+    if(m_instance==0)
+    {
+        m_instance = new FeedManager();
+    }
+    return m_instance;
+}
+
 FeedManager::FeedManager(QObject *parent) :
     QObject(parent)
 {
+    FeedManager::m_instance=0;
     m_http.setProxy("10.10.10.80", 3128);
    connect(&m_http, SIGNAL(requestFinished (int, bool)), this, SLOT(requestFinished( int, bool)));
 
