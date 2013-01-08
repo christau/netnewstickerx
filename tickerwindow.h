@@ -2,16 +2,19 @@
 #define TICKERWINDOW_H
 
 #include <QMainWindow>
-#include <QGLWidget>
+#include <QWidget>
 #include <QMouseEvent>
 #include <QTimer>
+
+#include <deque>
+#include <item.h>
 
 
 namespace Ui {
 class TickerWindow;
 }
 
-class TickerWindow : public QGLWidget
+class TickerWindow : public QWidget
 {
     Q_OBJECT
     
@@ -20,12 +23,13 @@ public:
     ~TickerWindow();
 
 public slots:
+    /**
+     * This should get called, if the feeds are finished loading in the FeedManager
+     */
     void feedsUpdated();
 
 protected:
-    void initializeGL();
-    void resizeGL(int w, int h);
-    void paintGL();
+    void paintEvent(QPaintEvent *pe);
     void mouseMoveEvent(QMouseEvent* event);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
@@ -38,6 +42,33 @@ private:
 
 private slots:
     void animate();
+
+private:
+    QMap<int, QPixmap> m_iconMap;
+    QColor m_colFont;
+    QColor m_colHoverFont;
+    std::deque<Item> m_items;
+    QFont m_font;
+    bool m_horizontalScrolling;
+    int m_mouseXOffs;
+    int m_mouseDelta;
+    float m_decay;
+    float m_stepSize;
+    int m_position;
+    int m_padding;
+    int m_height;
+    int m_iconWidth;
+    int m_hotItem;
+    bool m_mousePressed;
+    int m_mouseXPos;
+    bool m_doInitWidth;
+    bool m_feedsLoaded;
+    float m_scrollingDistance;
+    /*
+     * Distance between the news items in vertical scrolling mode
+     */
+    int m_itemVSpacing;
+
 
 };
 

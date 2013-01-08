@@ -1,6 +1,17 @@
 #include "faviconmanager.h"
 #include <QPixmap>
 
+FavIconManager* FavIconManager::m_instance = 0;
+
+FavIconManager* FavIconManager::getInstance()
+{
+    if(m_instance==0)
+    {
+        m_instance = new FavIconManager();
+    }
+    return m_instance;
+}
+
 FavIconManager::FavIconManager()
 {
     m_manager = new QNetworkAccessManager( );

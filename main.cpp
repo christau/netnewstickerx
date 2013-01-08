@@ -17,9 +17,9 @@ int main(int argc, char *argv[])
      proxy.setHostName("10.10.10.80");
      proxy.setPort(3128);
      QNetworkProxy::setApplicationProxy(proxy);*/
-     QNetworkProxyFactory::setUseSystemConfiguration(true);
+//     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
-    FavIconManager* m = new FavIconManager();
+    FavIconManager* m = FavIconManager::getInstance();
     m->cacheFavIcon("http://www.spiegel.de/favicon.ico");
 
 

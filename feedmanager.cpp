@@ -60,8 +60,14 @@ void FeedManager::requestFinished( int id, bool error)
         parseXml(feed, m_http.readAll());
         //remove id, since we parsed this feed
         m_scanIDs.remove(id);
-
+        if(m_scanIDs.count()==0)
+        {
+            emit feedsLoaded();
+        }
     }
+    else
+        m_scanIDs.remove(id);
+
     return;
 }
 

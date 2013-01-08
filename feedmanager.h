@@ -27,6 +27,9 @@ public:
     const QMap<QUrl, Feed*> & availableFeeds() const;
     
 signals:
+    /**
+     * This method gets emitted if all feeds are loaded
+     */
     void feedsLoaded();
     
 private slots:

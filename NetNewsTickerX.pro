@@ -25,8 +25,4 @@ HEADERS  += tickerwindow.h \
     feed.h \
     item.h
 
-QMAKE_LFLAGS += -F/System/LibraryFrameworks/OpenGL.framework
-QMAKE_LFLAGS += -F/System/LibraryFrameworks/GLUT.framework
-LIBS += -framework OpenGL
-LIBS += -framework GLUT
 FORMS    += tickerwindow.ui

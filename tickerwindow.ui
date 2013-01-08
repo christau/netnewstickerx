@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>TickerWindow</class>
- <widget class="QGLWidget" name="TickerWindow">
+ <widget class="QWidget" name="TickerWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
