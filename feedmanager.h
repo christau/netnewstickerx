@@ -6,7 +6,6 @@
 #include <QUrl>
 #include <QHttp>
 #include <QXmlStreamReader>
-#include <QLinkedList>
 
 #include "feed.h"
 
@@ -27,10 +26,7 @@ signals:
     void feedsLoaded();
     
 private slots:
- //   void readData(const QHttpResponseHeader &);
     void requestFinished( int id, bool error );
-//    void responseHeaderReceived(const QHttpResponseHeader&);
-    //void handleHeaderResponse ( const QHttpResponseHeader&);
 
 private:
     QMap<QUrl, Feed*> m_availableFeeds;
