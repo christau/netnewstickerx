@@ -101,7 +101,7 @@ void FeedManager::parseXml(Feed* feed, QByteArray content)
         {
             if (xml.name() == "item")
             {
-                Item* item = new Item(linkString,titleString,dateString);
+                Item* item = new Item(titleString,linkString,dateString);
                 feed->addItem(item);
                 isItem = false;
                 titleString.clear();

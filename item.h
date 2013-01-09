@@ -6,7 +6,7 @@
 class Item
 {
 public:
-    Item(QString link, QString title,QString date) : m_link(link), m_title(title),m_date(date)
+    Item(QString title,QString link, QString date) : m_link(link), m_title(title),m_date(date)
     {
     }
 
@@ -24,6 +24,7 @@ public:
     }
     void setIconId(int iconId)
     {
+
         m_iconId = iconId;
     }
 

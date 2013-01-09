@@ -30,7 +30,17 @@ TickerWindow::TickerWindow(QWidget *parent) :
     m_scrollingDistance = 1.;
     m_stepSize=1;
     m_horizontalScrolling=true;
-    m_position=1;
+    m_feedsLoaded = false;
+    m_mouseXOffs = 0;
+    m_stepSize = -1.;
+    m_decay = 0;
+    m_doInitWidth = true;
+    m_mousePressed = false;
+    m_height = 0;
+    m_iconWidth = 0;
+    m_hotItem = -1;
+    m_position = 0;
+    m_itemVSpacing = 0;
     connect(FeedManager::getInstance(), SIGNAL( feedsLoaded() ), this, SLOT( feedsUpdated() ));
     initScrollTimer();
 }
