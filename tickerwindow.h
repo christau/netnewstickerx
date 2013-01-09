@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QMouseEvent>
 #include <QTimer>
+#include <QWheelEvent>
 
 #include <deque>
 #include <item.h>
@@ -33,12 +34,19 @@ protected:
     void mouseMoveEvent(QMouseEvent* event);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
+
+    virtual void dropEvent ( QDropEvent * event );
+    virtual void wheelEvent(QWheelEvent *event);
+    virtual void moveEvent(QMoveEvent *event);
+    virtual void leaveEvent(QEvent *);
+
 private:
     void initScrollTimer();
     QPoint mLastMousePosition;
     bool mMoving;
     Ui::TickerWindow *ui;
     QTimer* m_pTimer;
+    QTimer* m_pMoveElapsedTimer;
 
 private slots:
     void animate();
@@ -48,7 +56,7 @@ private:
     QColor m_colFont;
     QColor m_colHoverFont;
     std::deque<Item> m_items;
-    QFont m_font;
+    QFont* m_font;
     bool m_horizontalScrolling;
     int m_mouseXOffs;
     int m_mouseDelta;
@@ -59,7 +67,6 @@ private:
     int m_height;
     int m_iconWidth;
     int m_hotItem;
-    bool m_mousePressed;
     int m_mouseXPos;
     bool m_doInitWidth;
     bool m_feedsLoaded;
@@ -68,6 +75,9 @@ private:
      * Distance between the news items in vertical scrolling mode
      */
     int m_itemVSpacing;
+
+private:
+    int getBorder(const QPoint& pos);
 
 
 };

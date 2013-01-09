@@ -17,12 +17,14 @@ SOURCES += main.cpp\
     faviconmanager.cpp \
     feedmanager.cpp \
     feed.cpp \
-    item.cpp
+    item.cpp \
+    tickerview.cpp
 
 HEADERS  += tickerwindow.h \
     faviconmanager.h \
     feedmanager.h \
     feed.h \
-    item.h
+    item.h \
+    tickerview.h
 
 FORMS    += tickerwindow.ui

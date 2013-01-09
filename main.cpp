@@ -1,6 +1,8 @@
 #include <QApplication>
 #include <QNetworkProxy>
+#include <QtGui>
 #include "tickerwindow.h"
+#include "tickerview.h"
 
 #include "faviconmanager.h"
 #include "feedmanager.h"

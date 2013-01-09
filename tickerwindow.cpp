@@ -2,6 +2,7 @@
 #include "ui_tickerwindow.h"
 #include "feedmanager.h"
 
+#include <QDebug>
 #include <QPainter>
 #include <QFontMetrics>
 #include <QSizeF>
@@ -27,6 +28,7 @@ TickerWindow::TickerWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint);
+    this->setMouseTracking(true);
     m_scrollingDistance = 1.;
     m_stepSize=1;
     m_horizontalScrolling=true;
@@ -35,14 +37,19 @@ TickerWindow::TickerWindow(QWidget *parent) :
     m_stepSize = -1.;
     m_decay = 0;
     m_doInitWidth = true;
-    m_mousePressed = false;
     m_height = 0;
     m_iconWidth = 0;
     m_hotItem = -1;
     m_position = 0;
     m_itemVSpacing = 0;
+    m_font = new QFont("Courier", 18, QFont::Bold, true);
     connect(FeedManager::getInstance(), SIGNAL( feedsLoaded() ), this, SLOT( feedsUpdated() ));
     initScrollTimer();
+
+    m_pMoveElapsedTimer = new QTimer(this);
+        connect(m_pMoveElapsedTimer, SIGNAL(timeout()), SLOT(moveTimeoutElapsed()));
+        m_pMoveElapsedTimer->setInterval(500);
+        m_pMoveElapsedTimer->setSingleShot(true);
 }
 
 TickerWindow::~TickerWindow()
@@ -52,28 +59,158 @@ TickerWindow::~TickerWindow()
 
 void TickerWindow::mousePressEvent(QMouseEvent* event)
 {
-    if(event->button() == Qt::LeftButton)
+    if (event->button() == Qt::LeftButton)
     {
         mMoving = true;
+        if (m_horizontalScrolling)
+        {
+            m_mouseXPos = event->pos().x();
+        }
+        else
+        {
+            m_mouseXPos = event->pos().y();
+        }
+
+        m_mouseXOffs = m_mouseXPos;
+        m_mouseDelta = 0;
         mLastMousePosition = event->globalPos();
     }
 }
 
 void TickerWindow::mouseMoveEvent(QMouseEvent* event)
 {
-    if( event->buttons().testFlag(Qt::LeftButton) && mMoving)
+    int border = getBorder(event->globalPos());
+    Qt::CursorShape s = Qt::ArrowCursor;
+    if(border!=-1)
+    {
+        switch(border)
+        {
+            case 1:
+            s=Qt::SizeVerCursor;
+            break;
+        case 2:
+            s=Qt::SizeHorCursor;
+            break;
+        case 3:
+            s=Qt::SizeVerCursor;
+            break;
+        case 4:
+            s=Qt::SizeHorCursor;
+            break;
+
+        }
+    }
+    setCursor(s);
+
+    if( event->buttons().testFlag(Qt::LeftButton) && mMoving && border==-1)
     {
         this->move(this->pos() + (event->globalPos() - mLastMousePosition));
         mLastMousePosition = event->globalPos();
+    }
+    else if(mMoving)
+    {
+        QRect r = this->geometry();
+        //r.
+        //this->setGeometry();
+    }
+    else
+    {
+        if (m_horizontalScrolling)
+        {
+            int w = m_position + m_iconWidth + 10;
+            int x = event->pos().x();
+            int y = event->pos().y();
+            qDebug()<<"X:"<<x<<" Y:"<<y;
+            qDebug()<<"Geom:"<<geometry();
+            m_hotItem = -1;
+            int item = 0;
+            int yMin = geometry().height() / 2 - m_height / 2;
+            int yMax = geometry().height() / 2 + m_height / 2;
+            for (std::deque<Item>::iterator it = m_items.begin(); it != m_items.end(); ++it)
+            {
+                int tmp = it->getWidth();
+
+                if (x > w && x < (w + tmp) && (y > yMin) && (y < yMax))
+                {
+                    m_hotItem = item;
+                    setCursor(Qt::PointingHandCursor);
+                    break;
+                }
+                w += tmp + m_padding + m_iconWidth;
+                if (w > this->size().width())
+                    break;
+                ++item;
+            }
+            if (m_hotItem == -1)
+                setCursor(Qt::ArrowCursor);
+        }
+        else
+        {
+            int y = event->pos().y();
+            int item = 0;
+            for (std::deque<Item>::iterator it = m_items.begin(); it != m_items.end(); ++it)
+            {
+                int h = item * 2 * m_height + item * m_itemVSpacing /*+ Y_OFFSET*/+ m_position;
+                if ((y > h - m_height) && (y < h))
+                {
+                    m_hotItem = item;
+                    setCursor(Qt::PointingHandCursor);
+                    break;
+                }
+                if (h > this->size().height())
+                {
+                    setCursor(Qt::ArrowCursor);
+                    m_hotItem = -1;
+                    break;
+                }
+                ++item;
+            }
+        }
     }
 }
 
 void TickerWindow::mouseReleaseEvent(QMouseEvent* event)
 {
-    if(event->button() == Qt::LeftButton)
+    mMoving = false;
+    //if the user moved the mouse too much
+    //do not check for opening the url
+    if (abs(m_mouseDelta) < 20)
     {
-        mMoving = false;
+        if (m_hotItem == -1)
+            return;
+        int item = 0;
+        for (std::deque<Item>::iterator it = m_items.begin(); it != m_items.end(); ++it)
+        {
+            if (m_hotItem == item)
+                QDesktopServices::openUrl(it->link());
+            ++item;
+        }
     }
+    else
+    {
+        if (m_mouseDelta < -20)
+        {
+            m_decay = 1.05;
+            m_stepSize = m_mouseDelta / 10;
+            if (m_stepSize > -(float) m_scrollingDistance)
+                m_stepSize = -(float) m_scrollingDistance;
+        }
+        else if (m_mouseDelta > 20)
+        {
+            m_decay = 1.03;
+            m_stepSize = m_mouseDelta / 10;
+            if (m_stepSize < (float) m_scrollingDistance)
+                m_stepSize = (float) m_scrollingDistance;
+        }
+    }
+
+    m_mouseXOffs = 0;
+    if (m_pMoveElapsedTimer->isActive())
+    {
+        m_pMoveElapsedTimer->stop();
+    }
+
+
 }
 
 void TickerWindow::initScrollTimer()
@@ -84,7 +221,7 @@ void TickerWindow::initScrollTimer()
         connect(m_pTimer, SIGNAL(timeout()), SLOT(animate()));
         m_pTimer->start(0);
     }
-    int msec = 16;//(1. / Settings::scrollingSpeed()) * 1000;
+    int msec = 25;//(1. / Settings::scrollingSpeed()) * 1000;
     m_pTimer->setInterval(msec);
 }
 
@@ -96,7 +233,7 @@ void TickerWindow::animate()
     }
     if (!m_horizontalScrolling)
     {
-        if (!m_mousePressed)
+        if (!mMoving)
         {
             if (m_decay != 0)
             {
@@ -143,7 +280,7 @@ void TickerWindow::animate()
     }
     else
     {
-        if (!m_mousePressed)
+        if (!mMoving)
         {
             if (m_decay != 0)
             {
@@ -282,6 +419,13 @@ void TickerWindow::feedsUpdated()
 
 }
 
+void TickerWindow::wheelEvent(QWheelEvent *event)
+{
+    animate();
+    m_position += event->delta() / 3;
+}
+
+
 void TickerWindow::paintEvent(QPaintEvent *pe)
 {
     QPainter p(this);
@@ -289,7 +433,7 @@ void TickerWindow::paintEvent(QPaintEvent *pe)
     p.setRenderHint(QPainter::Antialiasing);
 
     p.save();
-    p.setFont(m_font);
+    p.setFont(*m_font);
     p.setClipRect(contentsRect());
 
     if (!m_items.empty() && m_feedsLoaded)
@@ -393,6 +537,111 @@ void TickerWindow::paintEvent(QPaintEvent *pe)
     }
     p.restore();
 }
+
+void TickerWindow::dropEvent(QDropEvent * event)
+{
+    QList<QUrl> list = event->mimeData()->urls();
+    if (list.count() > 0)
+    {
+//        connect(NewsFeedManager::self(), SIGNAL( feedLoaded( const QUrl & ) ), this, SLOT( feedLoaded( const QUrl & ) ));
+//        NewsFeedManager::self()->updateFeed(list.at(0));
+    }
+}
+
+void TickerWindow::leaveEvent(QEvent *)
+{
+    m_hotItem = -1;
+    setCursor(Qt::ArrowCursor);
+}
+
+int TickerWindow::getBorder(const QPoint& pos)
+{
+    QRect r = this->geometry();
+    int tolerance = 5;
+    if(pos.x() < (r.x()+tolerance))
+    {
+        return 4;//West
+    }
+    else if(pos.x()>r.x()+r.width()-tolerance)
+    {
+        return 2;//East
+    }
+    else if(pos.y()<r.y()+tolerance)
+    {
+        return 1;//North
+    }
+    else if(pos.y()>r.y()+r.height()-tolerance)
+    {
+        return 3;//South
+    }
+
+    return -1;
+}
+
+void TickerWindow::moveEvent(QMoveEvent *event)
+{
+    if (mMoving)
+    {
+
+    }
+    else
+    {
+        if (m_horizontalScrolling)
+        {
+            int w = m_position + m_iconWidth + 10;
+            int x = event->pos().x();
+            int y = event->pos().y();
+            m_hotItem = -1;
+            int item = 0;
+            int yMin = this->geometry().top() + this->geometry().height() / 2 - m_height / 2;
+            int yMax = this->geometry().top() + this->geometry().height() / 2 + m_height / 2;
+            for (std::deque<Item>::iterator it = m_items.begin(); it != m_items.end(); ++it)
+            {
+                int tmp = it->getWidth();
+
+                if (x > w && x < (w + tmp) && (y > yMin) && (y < yMax))
+                {
+                    m_hotItem = item;
+                    setCursor(Qt::PointingHandCursor);
+                    break;
+                }
+                w += tmp + m_padding + m_iconWidth;
+                if (w > this->size().width())
+                    break;
+                ++item;
+            }
+            if (m_hotItem == -1)
+                setCursor(Qt::ArrowCursor);
+        }
+        else
+        {
+            int y = event->pos().y();
+            int item = 0;
+            for (std::deque<Item>::iterator it = m_items.begin(); it != m_items.end(); ++it)
+            {
+                int h = item * 2 * m_height + item * m_itemVSpacing /*+ Y_OFFSET*/+ m_position;
+                if ((y > h - m_height) && (y < h))
+                {
+                    m_hotItem = item;
+                    setCursor(Qt::PointingHandCursor);
+                    break;
+                }
+                if (h > this->size().height())
+                {
+                    setCursor(Qt::ArrowCursor);
+                    m_hotItem = -1;
+                    break;
+                }
+                ++item;
+            }
+
+            update();
+        }
+    }
+
+}
+
+
 
 
 
