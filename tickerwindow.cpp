@@ -27,7 +27,7 @@ TickerWindow::TickerWindow(QWidget *parent) :
     ui(new Ui::TickerWindow)
 {
     ui->setupUi(this);
-    this->setWindowFlags(Qt::FramelessWindowHint);
+    this->setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
     this->setMouseTracking(true);
     m_scrollingDistance = 1.;
     m_stepSize=1;
@@ -42,14 +42,19 @@ TickerWindow::TickerWindow(QWidget *parent) :
     m_hotItem = -1;
     m_position = 0;
     m_itemVSpacing = 0;
-    m_font = new QFont("Courier", 18, QFont::Bold, true);
+    m_font = new QFont("Arial", 25, QFont::Bold, false);
     connect(FeedManager::getInstance(), SIGNAL( feedsLoaded() ), this, SLOT( feedsUpdated() ));
     initScrollTimer();
+    m_border=Content;
 
     m_pMoveElapsedTimer = new QTimer(this);
         connect(m_pMoveElapsedTimer, SIGNAL(timeout()), SLOT(moveTimeoutElapsed()));
         m_pMoveElapsedTimer->setInterval(500);
         m_pMoveElapsedTimer->setSingleShot(true);
+
+    m_colHoverFont = QColor::fromRgb(255, 0, 0);
+    this->move(1680,0);
+    this->resize(1280,35);
 }
 
 TickerWindow::~TickerWindow()
@@ -79,39 +84,57 @@ void TickerWindow::mousePressEvent(QMouseEvent* event)
 
 void TickerWindow::mouseMoveEvent(QMouseEvent* event)
 {
-    int border = getBorder(event->globalPos());
-    Qt::CursorShape s = Qt::ArrowCursor;
-    if(border!=-1)
+    if(!mMoving)
     {
-        switch(border)
+        m_border = getBorder(event->globalPos());
+        Qt::CursorShape s = Qt::ArrowCursor;
+        if(m_border!=Content )
         {
-            case 1:
-            s=Qt::SizeVerCursor;
-            break;
-        case 2:
-            s=Qt::SizeHorCursor;
-            break;
-        case 3:
-            s=Qt::SizeVerCursor;
-            break;
-        case 4:
-            s=Qt::SizeHorCursor;
-            break;
+            switch(m_border)
+            {
+                case Top:
+                s=Qt::SizeVerCursor;
+                break;
+            case Right:
+                s=Qt::SizeHorCursor;
+                break;
+            case Bottom:
+                s=Qt::SizeVerCursor;
+                break;
+            case Left:
+                s=Qt::SizeHorCursor;
+                break;
 
+            }
         }
+        setCursor(s);
     }
-    setCursor(s);
 
-    if( event->buttons().testFlag(Qt::LeftButton) && mMoving && border==-1)
+    if( event->buttons().testFlag(Qt::LeftButton) && mMoving && m_border==Content)
     {
         this->move(this->pos() + (event->globalPos() - mLastMousePosition));
         mLastMousePosition = event->globalPos();
     }
-    else if(mMoving)
+    else if(mMoving && m_border!=Content)
     {
         QRect r = this->geometry();
-        //r.
-        //this->setGeometry();
+        switch(m_border)
+        {
+            case Top:
+                r.setTop(event->globalPos().y());
+            break;
+            case Right:
+                r.setRight(event->globalPos().x());
+            break;
+            case Bottom:
+                r.setBottom(event->globalPos().y());
+            break;
+            case Left:
+                r.setLeft(event->globalPos().x());
+            break;
+        }
+
+        this->setGeometry(r);
     }
     else
     {
@@ -141,7 +164,7 @@ void TickerWindow::mouseMoveEvent(QMouseEvent* event)
                     break;
                 ++item;
             }
-            if (m_hotItem == -1)
+            if (m_hotItem == -1 && m_border ==-1)
                 setCursor(Qt::ArrowCursor);
         }
         else
@@ -554,28 +577,28 @@ void TickerWindow::leaveEvent(QEvent *)
     setCursor(Qt::ArrowCursor);
 }
 
-int TickerWindow::getBorder(const QPoint& pos)
+TickerWindow::Corner TickerWindow::getBorder(const QPoint& pos)
 {
     QRect r = this->geometry();
     int tolerance = 5;
     if(pos.x() < (r.x()+tolerance))
     {
-        return 4;//West
+        return Left;//West
     }
     else if(pos.x()>r.x()+r.width()-tolerance)
     {
-        return 2;//East
+        return Right;//East
     }
     else if(pos.y()<r.y()+tolerance)
     {
-        return 1;//North
+        return Top;//North
     }
     else if(pos.y()>r.y()+r.height()-tolerance)
     {
-        return 3;//South
+        return Bottom;//South
     }
 
-    return -1;
+    return Content;
 }
 
 void TickerWindow::moveEvent(QMoveEvent *event)

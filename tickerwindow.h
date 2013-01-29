@@ -76,8 +76,22 @@ private:
      */
     int m_itemVSpacing;
 
+    enum Corner
+    {
+        Content,
+        Top,
+        TopRight,
+        Right,
+        BottomRight,
+        Bottom,
+        BottomLeft,
+        Left,
+        TopLeft
+    };
+    Corner m_border;
+
 private:
-    int getBorder(const QPoint& pos);
+    Corner getBorder(const QPoint& pos);
 
 
 };
