@@ -10,6 +10,8 @@
 #include <deque>
 #include <item.h>
 
+#include "configuration.h"
+
 
 namespace Ui {
 class TickerWindow;
@@ -28,6 +30,8 @@ public slots:
      * This should get called, if the feeds are finished loading in the FeedManager
      */
     void feedsUpdated();
+    void ShowContextMenu(const QPoint& pos);
+    void configChanged(Configuration* cfg);
 
 protected:
     void paintEvent(QPaintEvent *pe);

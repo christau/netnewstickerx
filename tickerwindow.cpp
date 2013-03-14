@@ -1,6 +1,7 @@
 #include "tickerwindow.h"
 #include "ui_tickerwindow.h"
 #include "feedmanager.h"
+#include "configdialog.h"
 
 #include <QDebug>
 #include <QPainter>
@@ -26,6 +27,9 @@ TickerWindow::TickerWindow(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TickerWindow)
 {
+    //    setStyleSheet("background:transparent;");
+    //    setAttribute(Qt::WA_TranslucentBackground);
+    //    setWindowFlags(Qt::FramelessWindowHint);
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
     this->setMouseTracking(true);
@@ -48,19 +52,60 @@ TickerWindow::TickerWindow(QWidget *parent) :
     m_border=Content;
 
     m_pMoveElapsedTimer = new QTimer(this);
-        connect(m_pMoveElapsedTimer, SIGNAL(timeout()), SLOT(moveTimeoutElapsed()));
-        m_pMoveElapsedTimer->setInterval(500);
-        m_pMoveElapsedTimer->setSingleShot(true);
+    connect(m_pMoveElapsedTimer, SIGNAL(timeout()), SLOT(moveTimeoutElapsed()));
+    m_pMoveElapsedTimer->setInterval(500);
+    m_pMoveElapsedTimer->setSingleShot(true);
 
     m_colHoverFont = QColor::fromRgb(255, 0, 0);
+
+
+    // myWidget is any QWidget-derived class
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
+            this, SLOT(ShowContextMenu(const QPoint&)));
+
+
+
+
     this->move(1680,0);
     this->resize(1280,35);
+
+
 }
 
 TickerWindow::~TickerWindow()
 {
     delete ui;
 }
+
+void TickerWindow::ShowContextMenu(const QPoint& pos)
+{
+    QPoint globalPos = this->mapToGlobal(pos);
+
+    QMenu myMenu;
+    myMenu.addAction("Reload Feeds");
+    myMenu.addAction("Configuration");
+    myMenu.addSeparator();
+    myMenu.addAction("Exit");
+
+    QAction* selectedItem = myMenu.exec(globalPos);
+    if (selectedItem)
+    {
+        if(selectedItem->text()=="Configuration")
+        {
+            ConfigDialog* dlg = new ConfigDialog();
+            dlg->show();
+        }
+        else if(selectedItem->text()=="Exit")
+            exit(0);
+    }
+    else
+    {
+        // nothing was chosen
+    }
+}
+
+
 
 void TickerWindow::mousePressEvent(QMouseEvent* event)
 {
@@ -92,7 +137,7 @@ void TickerWindow::mouseMoveEvent(QMouseEvent* event)
         {
             switch(m_border)
             {
-                case Top:
+            case Top:
                 s=Qt::SizeVerCursor;
                 break;
             case Right:
@@ -120,17 +165,17 @@ void TickerWindow::mouseMoveEvent(QMouseEvent* event)
         QRect r = this->geometry();
         switch(m_border)
         {
-            case Top:
-                r.setTop(event->globalPos().y());
+        case Top:
+            r.setTop(event->globalPos().y());
             break;
-            case Right:
-                r.setRight(event->globalPos().x());
+        case Right:
+            r.setRight(event->globalPos().x());
             break;
-            case Bottom:
-                r.setBottom(event->globalPos().y());
+        case Bottom:
+            r.setBottom(event->globalPos().y());
             break;
-            case Left:
-                r.setLeft(event->globalPos().x());
+        case Left:
+            r.setLeft(event->globalPos().x());
             break;
         }
 
@@ -375,42 +420,42 @@ void TickerWindow::feedsUpdated()
             m_items.push_back(it);
         }
 
-//        if (!favIcon.isEmpty())
-//        {
-//            QPixmap pm = SmallIcon(favIcon);
-//            m_iconMap[iconIdx] = pm;
-//            iIdx = iconIdx;
-//            ++iconIdx;
-//        }
-//        else
-//        {
-//            //download the icon
-//            KTemporaryFile* tmpFile = new KTemporaryFile();
-//            if (tmpFile->open())
-//            {
-//                QUrl l(feed->link());
-//                QString url = "http://" + l.host() + "/favicon.ico";
-//                KIO::Job* getJob = KIO::file_copy(url, KUrl(tmpFile->fileName()), -1, KIO::Overwrite
-//                        | KIO::HideProgressInfo);
-//                getJob->ui()->setWindow(0);
-//                if (KIO::NetAccess::synchronousRun(getJob, 0))
-//                {
-//                    QPixmap p(tmpFile->fileName());
-//                    if (p.width() > 0)
-//                    {
-//                        iIdx = iconIdx;
-//                        m_iconMap[iIdx] = p;
-//                        ++iconIdx;
-//                    }
-//                }
-//                else
-//                {
-//                    iIdx = 0;
-//                }
-//            }
-//            tmpFile->close();
-//            delete tmpFile;
-//        }
+        //        if (!favIcon.isEmpty())
+        //        {
+        //            QPixmap pm = SmallIcon(favIcon);
+        //            m_iconMap[iconIdx] = pm;
+        //            iIdx = iconIdx;
+        //            ++iconIdx;
+        //        }
+        //        else
+        //        {
+        //            //download the icon
+        //            KTemporaryFile* tmpFile = new KTemporaryFile();
+        //            if (tmpFile->open())
+        //            {
+        //                QUrl l(feed->link());
+        //                QString url = "http://" + l.host() + "/favicon.ico";
+        //                KIO::Job* getJob = KIO::file_copy(url, KUrl(tmpFile->fileName()), -1, KIO::Overwrite
+        //                        | KIO::HideProgressInfo);
+        //                getJob->ui()->setWindow(0);
+        //                if (KIO::NetAccess::synchronousRun(getJob, 0))
+        //                {
+        //                    QPixmap p(tmpFile->fileName());
+        //                    if (p.width() > 0)
+        //                    {
+        //                        iIdx = iconIdx;
+        //                        m_iconMap[iIdx] = p;
+        //                        ++iconIdx;
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    iIdx = 0;
+        //                }
+        //            }
+        //            tmpFile->close();
+        //            delete tmpFile;
+        //        }
         int itemCnt = 0;
         /**
          * Get max item count for this feed
@@ -420,19 +465,19 @@ void TickerWindow::feedsUpdated()
         /**
          * find the correct feed position, since they are not the same order in NewsFeedManager
          */
-//        for (int i = 0; i < Settings::feedUrls().count(); ++i)
-//        {
-//            if(Settings::feedUrls().at(i) == currentFeedUrl)
-//            {
-//                pos = i;
-//                break;
-//            }
-//        }
+        //        for (int i = 0; i < Settings::feedUrls().count(); ++i)
+        //        {
+        //            if(Settings::feedUrls().at(i) == currentFeedUrl)
+        //            {
+        //                pos = i;
+        //                break;
+        //            }
+        //        }
 
-//        if(Settings::feedMaxItems().count() > feedPos)
-//        {
-//            maxItems = Settings::feedMaxItems().at(pos);
-//        }
+        //        if(Settings::feedMaxItems().count() > feedPos)
+        //        {
+        //            maxItems = Settings::feedMaxItems().at(pos);
+        //        }
     }
     m_iconWidth = 0;
     m_height = 0;
@@ -566,8 +611,8 @@ void TickerWindow::dropEvent(QDropEvent * event)
     QList<QUrl> list = event->mimeData()->urls();
     if (list.count() > 0)
     {
-//        connect(NewsFeedManager::self(), SIGNAL( feedLoaded( const QUrl & ) ), this, SLOT( feedLoaded( const QUrl & ) ));
-//        NewsFeedManager::self()->updateFeed(list.at(0));
+        //        connect(NewsFeedManager::self(), SIGNAL( feedLoaded( const QUrl & ) ), this, SLOT( feedLoaded( const QUrl & ) ));
+        //        NewsFeedManager::self()->updateFeed(list.at(0));
     }
 }
 
@@ -662,6 +707,11 @@ void TickerWindow::moveEvent(QMoveEvent *event)
         }
     }
 
+}
+
+void TickerWindow::configChanged(Configuration* cfg)
+{
+    return;
 }
 
 
