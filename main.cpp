@@ -2,13 +2,13 @@
 #include <QNetworkProxy>
 #include <QtGui>
 #include "tickerwindow.h"
-#include "tickerview.h"
 
 #include "configuration.h"
 
 #include "faviconmanager.h"
 #include "feedmanager.h"
 
+#include <signal.h>
 
 int main(int argc, char *argv[])
 {
@@ -42,6 +42,6 @@ int main(int argc, char *argv[])
     f->setSubscriptions(cfg->m_feeds);
 
     QObject::connect(cfg, SIGNAL(configChanged(Configuration*)), &w, SLOT(configChanged(Configuration*)));
-    
+    QObject::connect(&a, SIGNAL(aboutToQuit()), &w, SLOT(closing()));
     return a.exec();
 }

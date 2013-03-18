@@ -32,7 +32,11 @@ public slots:
     void feedsUpdated();
     void ShowContextMenu(const QPoint& pos);
     void configChanged(Configuration* cfg);
-
+    void closing()
+    {
+        Configuration::getInstance()->m_windowPos=this->geometry();
+        Configuration::getInstance()->saveConfiguration();
+    }
 protected:
     void paintEvent(QPaintEvent *pe);
     void mouseMoveEvent(QMouseEvent* event);

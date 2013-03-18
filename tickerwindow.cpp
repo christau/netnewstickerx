@@ -58,19 +58,22 @@ TickerWindow::TickerWindow(QWidget *parent) :
 
     m_colHoverFont = QColor::fromRgb(255, 0, 0);
 
-
     // myWidget is any QWidget-derived class
     this->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(ShowContextMenu(const QPoint&)));
 
-
-
-
-    this->move(1680,0);
-    this->resize(1280,35);
-
-
+    QRect pos = Configuration::getInstance()->m_windowPos;
+    if(pos.width()==0 || pos.height()==0)
+    {
+        this->move(0,0);
+        this->resize(200,50);
+    }
+    else
+    {
+        this->move(pos.topLeft());
+        this->resize(pos.size());
+    }
 }
 
 TickerWindow::~TickerWindow()
@@ -97,7 +100,11 @@ void TickerWindow::ShowContextMenu(const QPoint& pos)
             dlg->show();
         }
         else if(selectedItem->text()=="Exit")
+        {
+            Configuration::getInstance()->m_windowPos = this->geometry();
+            Configuration::getInstance()->saveConfiguration();
             exit(0);
+        }
     }
     else
     {

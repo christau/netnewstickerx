@@ -16,7 +16,6 @@ SOURCES += main.cpp\
     feedmanager.cpp \
     feed.cpp \
     item.cpp \
-    tickerview.cpp \
     configdialog.cpp \
     configuration.cpp \
     colorbutton.cpp
@@ -26,7 +25,6 @@ HEADERS  += tickerwindow.h \
     feedmanager.h \
     feed.h \
     item.h \
-    tickerview.h \
     configdialog.h \
     configuration.h \
     colorbutton.h
@@ -34,3 +32,7 @@ HEADERS  += tickerwindow.h \
 FORMS    += tickerwindow.ui \
     configdialog.ui
 
+mac {
+    QMAKE_INFO_PLIST = NetNewsTickerX.plist
+    ICON = NetNewsTickerX.icns
+}

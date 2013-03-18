@@ -1,6 +1,9 @@
 #include "configuration.h"
 
 #include <QSettings>
+#include <QDir>
+#include <QDebug>
+#include <qdesktopservices.h>
 
 /*
  * Singleton
@@ -12,9 +15,20 @@ Configuration::Configuration()
     INSTANCE = NULL;
 }
 
+QString Configuration::getDataLocation()
+{
+    QString loc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    if(!QDir(loc + "/NetNewsTickerX").exists())
+    {
+        QDir(loc).mkdir("NetNewsTickerX");
+    }
+    return loc + "/NetNewsTickerX";
+}
+
 void Configuration::loadConfiguration()
 {
-    QSettings settings("/tmp/NetNewsTicker.cfg", QSettings::NativeFormat);
+
+    QSettings settings(getDataLocation() + "/NetNewsTicker.cfg", QSettings::NativeFormat);
     Configuration * cfg = INSTANCE;
     cfg->m_refreshInterval = settings.value("RefreshInterval", "15").toInt();
     cfg->m_maxItems = settings.value("MaxItems", "0").toInt();
@@ -24,11 +38,13 @@ void Configuration::loadConfiguration()
     cfg->m_font = settings.value("Font").value<QFont>();
     cfg->m_fontSize = settings.value("FontSize").toInt();
     cfg->m_feeds = settings.value("Feeds").value<QStringList>();
+    cfg->m_windowPos = settings.value("WindowPos").value<QRect>();
 }
 
 void Configuration::saveConfiguration()
 {
-    QSettings settings("/tmp/NetNewsTicker.cfg", QSettings::NativeFormat);
+    //TODO:Get the correct directory
+    QSettings settings(getDataLocation() + "/NetNewsTicker.cfg", QSettings::NativeFormat);
     Configuration * cfg = INSTANCE;
     settings.setValue("RefreshInterval", cfg->m_refreshInterval);
     settings.setValue("MaxItems", cfg->m_maxItems);
@@ -38,6 +54,7 @@ void Configuration::saveConfiguration()
     settings.setValue("Font", cfg->m_font);
     settings.setValue("FontSize", cfg->m_fontSize);
     settings.setValue("Feeds", cfg->m_feeds);
+    settings.setValue("WindowPos", cfg->m_windowPos);
     settings.sync();
     emit configChanged(this);
 }

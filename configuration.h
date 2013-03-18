@@ -2,6 +2,7 @@
 #define CONFIGURATION_H
 
 #include <QColor>
+#include <QRect>
 #include <QFont>
 #include <QStringList>
 
@@ -22,6 +23,10 @@ public:
     int m_maxItems;
     int m_fontSize;
 
+    /**
+     * @brief m_windowPos - Last poosition of the ticker window. Used to restore the position at restart
+     */
+    QRect m_windowPos;
     QColor m_textColor;
     QColor m_bkgColor;
     QFont m_font;
@@ -31,6 +36,7 @@ signals:
     void configChanged(Configuration* cfg);
 
 private:
+    QString getDataLocation();
     static Configuration* INSTANCE;
 
 };
