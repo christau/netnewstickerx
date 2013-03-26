@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     item.cpp \
     configdialog.cpp \
     configuration.cpp \
-    colorbutton.cpp
+    colorbutton.cpp \
+    favicon.cpp
 
 HEADERS  += tickerwindow.h \
     faviconmanager.h \
@@ -27,7 +28,8 @@ HEADERS  += tickerwindow.h \
     item.h \
     configdialog.h \
     configuration.h \
-    colorbutton.h
+    colorbutton.h \
+    favicon.h
 
 FORMS    += tickerwindow.ui \
     configdialog.ui
