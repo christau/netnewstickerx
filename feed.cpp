@@ -1,8 +1,5 @@
 #include "feed.h"
 
-Feed::Feed()
-{
-}
 
 void Feed::addItem(Item* item)
 {

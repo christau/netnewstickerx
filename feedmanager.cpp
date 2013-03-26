@@ -54,10 +54,13 @@ void FeedManager::requestFinished( int id, bool error)
         }
         else
         {
-            feed = new Feed();
+            feed = new Feed(url);
             m_availableFeeds[url]=feed;
         }
-        parseXml(feed, m_http.readAll());
+        if(!parseXml(feed, m_http.readAll()))
+        {
+            qDebug()<<"Parse error in rss:"<<url;
+        }
         //remove id, since we parsed this feed
         m_scanIDs.remove(id);
         if(m_scanIDs.count()==0)
@@ -71,8 +74,9 @@ void FeedManager::requestFinished( int id, bool error)
     return;
 }
 
-void FeedManager::parseXml(Feed* feed, QByteArray content)
+bool FeedManager::parseXml(Feed* feed, QByteArray content)
 {
+    qDebug()<< "URL:"<<feed->link();
     QString currentTag;
     QString linkString;
     QString titleString;
@@ -128,6 +132,8 @@ void FeedManager::parseXml(Feed* feed, QByteArray content)
     if (xml.error() && xml.error() != QXmlStreamReader::PrematureEndOfDocumentError)
     {
         qWarning() << "XML ERROR:" << xml.lineNumber() << ": " << xml.errorString();
+        return false;
     }
+    return true;
 }
 

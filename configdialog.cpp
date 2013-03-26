@@ -6,6 +6,7 @@
 #include <QInputDialog>
 #include <QStringListModel>
 #include <QStringList>
+#include <QDebug>
 
 ConfigDialog::ConfigDialog(QWidget *parent) :
     QDialog(parent),
@@ -68,5 +69,22 @@ void ConfigDialog::on_m_btnAddFeed_clicked()
 
 void ConfigDialog::on_m_btnDelFeed_clicked()
 {
+   /* QModelIndexList selected = ui->m_lstFeeds->selectionModel()->selectedIndexes();
+    if (!selected.isEmpty())
+    {
+        qSort(selected);
+        for (int i=0; i<selected.count(); ++i)
+        {
+            stringList.removeAt(selected.at(i).row()-i);
+        }
+        ((QStringListModel*) ui->listView->model())->setStringList(stringList);
+    }*/
+    QModelIndexList selectedRows = ui->m_lstFeeds->selectionModel()->selectedRows();
+     Configuration* cfg = Configuration::getInstance();
+     cfg->m_feeds.removeOne(ui->m_lstFeeds->model()->index(selectedRows.first().row(),0).data().toString());
+
+    ui->m_lstFeeds->model()->removeRow(selectedRows.first().row());
+    ui->m_lstFeeds->reset();
+    qDebug()<<"Sel size:"<< selectedRows.size();
 
 }

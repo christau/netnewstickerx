@@ -379,5 +379,25 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>m_btnDelFeed</sender>
+   <signal>clicked()</signal>
+   <receiver>ConfigDialog</receiver>
+   <slot>delFeeds()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>376</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>209</x>
+     <y>398</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>delFeeds()</slot>
+ </slots>
 </ui>

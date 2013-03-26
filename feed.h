@@ -2,13 +2,18 @@
 #define FEED_H
 
 #include<QList>
+#include<QUrl>
 
 #include "item.h"
 
 class Feed
 {
 public:
-    Feed();
+    Feed(QUrl url)
+    {
+        m_link=url;
+    }
+
     const QList<Item*> items()
     {
         return m_items;
@@ -19,7 +24,7 @@ public:
         return m_title;
     }
 
-    const QString& link()
+    const QUrl& link()
     {
         return m_link;
     }
@@ -27,7 +32,7 @@ public:
 
 private:
     QString m_title;
-    QString m_link;
+    QUrl m_link;
     QList<Item*> m_items;
 
 };

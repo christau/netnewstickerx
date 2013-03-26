@@ -39,7 +39,7 @@ private:
     QMap<QUrl, Feed*> m_availableFeeds;
     QMap<int, QUrl> m_scanIDs;
     QHttp m_http;
-    void parseXml(Feed* feed, QByteArray content);
+    bool parseXml(Feed* feed, QByteArray content);
     static FeedManager* m_instance;
     
 };
