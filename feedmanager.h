@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QMap>
 #include <QUrl>
-#include <QHttp>
+#include <QNetworkAccessManager>
 #include <QXmlStreamReader>
 
 #include "feed.h"
@@ -33,12 +33,12 @@ signals:
     void feedsLoaded();
     
 private slots:
-    void requestFinished( int id, bool error );
+    void requestFinished(QNetworkReply*);
 
 private:
     QMap<QUrl, Feed*> m_availableFeeds;
     QMap<int, QUrl> m_scanIDs;
-    QHttp m_http;
+    QNetworkAccessManager m_http;
     bool parseXml(Feed* feed, QByteArray content);
     static FeedManager* m_instance;
     

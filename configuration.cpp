@@ -17,12 +17,15 @@ Configuration::Configuration()
 
 QString Configuration::getDataLocation()
 {
-    QString loc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-    if(!QDir(loc + "/NetNewsTickerX").exists())
+    QString loc = QStandardPaths::standardLocations(QStandardPaths::DataLocation).at(0);
+    qDebug()<<"Loc:"<<loc;
+    /*if(!QDir(loc + "/NetNewsTickerX").exists())
     {
         QDir(loc).mkdir("NetNewsTickerX");
     }
     return loc + "/NetNewsTickerX";
+    */
+    return loc;
 }
 
 void Configuration::loadConfiguration()

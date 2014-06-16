@@ -8,7 +8,6 @@
 #include <QFontMetrics>
 #include <QSizeF>
 #include <QTimer>
-#include <QtNetwork/QHttp>
 #include <QFile>
 #include <QList>
 #include <QGraphicsSceneWheelEvent>
@@ -20,6 +19,7 @@
 #include <QAction>
 #include <QMessageBox>
 #include <QMenu>
+#include <QMimeData>
 
 
 
@@ -52,7 +52,7 @@ TickerWindow::TickerWindow(QWidget *parent) :
     m_border=Content;
 
     m_pMoveElapsedTimer = new QTimer(this);
-    connect(m_pMoveElapsedTimer, SIGNAL(timeout()), SLOT(moveTimeoutElapsed()));
+    //connect(m_pMoveElapsedTimer, SIGNAL(timeout()), SLOT(moveTimeoutElapsed()));
     m_pMoveElapsedTimer->setInterval(500);
     m_pMoveElapsedTimer->setSingleShot(true);
 

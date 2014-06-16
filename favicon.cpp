@@ -40,7 +40,7 @@ Favicons :: ~Favicons( )
 QString
 Favicons :: getCacheDir( )
 {
-    const QString base = QDesktopServices::storageLocation( QDesktopServices::CacheLocation );
+    const QString base = QStandardPaths::standardLocations(QStandardPaths::CacheLocation).at(0);;
     return QDir( base ).absoluteFilePath( "favicons" );
 }
 

@@ -1,6 +1,8 @@
 #include "feedmanager.h"
 
 #include <QDebug>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
 FeedManager* FeedManager::m_instance = 0;
 
@@ -17,8 +19,8 @@ FeedManager::FeedManager(QObject *parent) :
     QObject(parent)
 {
     FeedManager::m_instance=0;
-    m_http.setProxy("10.10.10.80", 3128);
-   connect(&m_http, SIGNAL(requestFinished (int, bool)), this, SLOT(requestFinished( int, bool)));
+   // m_http.setProxy("10.10.10.80", 3128);
+   connect(&m_http, SIGNAL(finished (QNetworkReply*)), this, SLOT(requestFinished(QNetworkReply*)));
 
 }
 
@@ -27,26 +29,13 @@ void FeedManager::setSubscriptions( const QStringList &urls )
     foreach(QString s, urls)
     {
         QUrl url(s);
-        m_http.setHost(url.host(), url.port() != -1 ? url.port() : 80);
-        int id = m_http.get(url.path());
-        m_scanIDs[id] = url;
-    }
-}
+        url.setHost(url.host());
+        url.setPort( url.port() != -1 ? url.port() : 80);
+        QNetworkRequest req(url);
+        m_http.get(req);
 
-const QMap<QUrl, Feed*> &FeedManager::availableFeeds() const
-{
-    return m_availableFeeds;
-}
-
-void FeedManager::requestFinished( int id, bool error)
-{
-    if(error)
-    {
-        qDebug() <<"Error";
-    }
-    else if(m_scanIDs.contains(id))
-    {
-        QUrl url = m_scanIDs[id];
+        //m_scanIDs[id] = url;
+/*
         Feed* feed;
         if(m_availableFeeds.contains(url))
         {
@@ -57,26 +46,63 @@ void FeedManager::requestFinished( int id, bool error)
             feed = new Feed(url);
             m_availableFeeds[url]=feed;
         }
-        if(!parseXml(feed, m_http.readAll()))
+        qDebug()<<"Ret:"<<id->readAll();
+        if(!parseXml(feed, id->readAll()))
+        {
+            qDebug()<<"Parse error in rss:"<<url;
+        }
+*/
+    }
+     //emit feedsLoaded();
+
+}
+
+const QMap<QUrl, Feed*> &FeedManager::availableFeeds() const
+{
+    return m_availableFeeds;
+}
+
+void FeedManager::requestFinished(QNetworkReply* reply)
+{
+    QUrl url = reply->url();
+    /*if(error)
+    {
+        qDebug() <<"Error";
+    }*/
+    /*else if(m_scanIDs.contains(id))*/
+    {
+        //QUrl url = m_scanIDs[id];
+        Feed* feed;
+        if(m_availableFeeds.contains(url))
+        {
+            feed = m_availableFeeds[url];
+        }
+        else
+        {
+            feed = new Feed(url);
+            m_availableFeeds[url]=feed;
+        }
+        //qDebug()<<"URL:"<<url;
+        //qDebug()<<"Ret:"<<reply->readAll();
+        if(!parseXml(feed, reply->readAll()))
         {
             qDebug()<<"Parse error in rss:"<<url;
         }
         //remove id, since we parsed this feed
-        m_scanIDs.remove(id);
+       // m_scanIDs.remove(id);
         if(m_scanIDs.count()==0)
         {
             emit feedsLoaded();
         }
     }
-    else
-        m_scanIDs.remove(id);
+//    else
+//        m_scanIDs.remove(id);
 
     return;
 }
 
 bool FeedManager::parseXml(Feed* feed, QByteArray content)
 {
-    qDebug()<< "URL:"<<feed->link();
     QString currentTag;
     QString linkString;
     QString titleString;
@@ -134,6 +160,7 @@ bool FeedManager::parseXml(Feed* feed, QByteArray content)
         qWarning() << "XML ERROR:" << xml.lineNumber() << ": " << xml.errorString();
         return false;
     }
+    qDebug()<<"Items for "<<feed->link()<<" "<<feed->items().size();
     return true;
 }
 
