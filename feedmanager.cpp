@@ -1,4 +1,5 @@
 #include "feedmanager.h"
+#include "faviconmanager.h"
 
 #include <QDebug>
 #include <QNetworkRequest>
@@ -33,6 +34,8 @@ void FeedManager::setSubscriptions( const QStringList &urls )
         url.setPort( url.port() != -1 ? url.port() : 80);
         QNetworkRequest req(url);
         m_http.get(req);
+        url.setPath("/favicon.ico");
+        FavIconManager::getInstance()->cacheFavIcon(url.toString());
 
         //m_scanIDs[id] = url;
 /*

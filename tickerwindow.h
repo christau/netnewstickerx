@@ -62,6 +62,7 @@ private slots:
 private:
     QMap<int, QPixmap> m_iconMap;
     QColor m_colFont;
+    QColor m_colBkg;
     QColor m_colHoverFont;
     std::deque<Item> m_items;
     QFont* m_font;

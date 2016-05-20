@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
     FeedManager* f=FeedManager::getInstance();
 //    QStringList s;
-////    s<<"http://www.spiegel.de/schlagzeilen/tops/index.rss";
+//    s<<"http://www.spiegel.de/schlagzeilen/tops/index.rss";
 //    s<<"http://www.pl-forum.de/backend/pro-linux.rdf";
 //    s<<"http://slashdot.org/slashdot.rdf";
 //    s<<"http://www.spiegel.de/schlagzeilen/rss/0\\,5291\\,\\,00.xml";

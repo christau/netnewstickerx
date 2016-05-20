@@ -1,6 +1,7 @@
 #include "tickerwindow.h"
 #include "ui_tickerwindow.h"
 #include "feedmanager.h"
+#include "faviconmanager.h"
 #include "configdialog.h"
 
 #include <QDebug>
@@ -33,6 +34,7 @@ TickerWindow::TickerWindow(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
     this->setMouseTracking(true);
+    m_pTimer=NULL;
     m_scrollingDistance = 1.;
     m_stepSize=1;
     m_horizontalScrolling=true;
@@ -46,10 +48,14 @@ TickerWindow::TickerWindow(QWidget *parent) :
     m_hotItem = -1;
     m_position = 0;
     m_itemVSpacing = 0;
-    m_font = new QFont("Arial", 25, QFont::Bold, false);
+    int fontSize = Configuration::getInstance()->m_fontSize;
+    m_font = new QFont("Arial", fontSize>0?fontSize:25, QFont::Bold, false);
+    m_colFont = Configuration::getInstance()->m_textColor;
+    m_colBkg = Configuration::getInstance()->m_bkgColor;
     connect(FeedManager::getInstance(), SIGNAL( feedsLoaded() ), this, SLOT( feedsUpdated() ));
     initScrollTimer();
     m_border=Content;
+    mMoving = false;
 
     m_pMoveElapsedTimer = new QTimer(this);
     //connect(m_pMoveElapsedTimer, SIGNAL(timeout()), SLOT(moveTimeoutElapsed()));
@@ -294,10 +300,10 @@ void TickerWindow::initScrollTimer()
     {
         m_pTimer = new QTimer(this);
         connect(m_pTimer, SIGNAL(timeout()), SLOT(animate()));
-        m_pTimer->start(0);
+        m_pTimer->start(25);
     }
-    int msec = 25;//(1. / Settings::scrollingSpeed()) * 1000;
-    m_pTimer->setInterval(msec);
+    //int msec = 25;//(1. / Settings::scrollingSpeed()) * 1000;
+   // m_pTimer->setInterval(msec);
 }
 
 void TickerWindow::animate()
@@ -419,20 +425,27 @@ void TickerWindow::feedsUpdated()
         QString currentFeedUrl = avFeeds.at(feedPos).toString();
         Feed* feed = availableFeeds.at(feedPos);
         int iIdx = 0;
-        const QString favIcon = "";//KMimeType::favIconForUrl(feed->link());
-
+   //     const QString favIcon = feed->link().toString();//KMimeType::favIconForUrl(feed->link());
+        QUrl tmp = QUrl(feed->link());
+        tmp.setPath("/favicon.ico");
+        QPixmap pm = FavIconManager::getInstance()->getFavIcon(tmp.toString());
+        iIdx = -1;
+        if(!pm.isNull())
+        {
+            m_iconMap[iconIdx] = pm;
+            iIdx = iconIdx;
+            ++iconIdx;
+        }
         foreach (Item* item, feed->items())
         {
             Item it(item->title(),item->link(),item->date());
+            if(iIdx>-1)
+            {
+                it.setIconId(iIdx);
+            }
             m_items.push_back(it);
         }
 
-        //        if (!favIcon.isEmpty())
-        //        {
-        //            QPixmap pm = SmallIcon(favIcon);
-        //            m_iconMap[iconIdx] = pm;
-        //            iIdx = iconIdx;
-        //            ++iconIdx;
         //        }
         //        else
         //        {
@@ -510,7 +523,7 @@ void TickerWindow::paintEvent(QPaintEvent *pe)
     p.save();
     p.setFont(*m_font);
     p.setClipRect(contentsRect());
-
+    //p.fillRect((contentsRect()), m_colBkg);
     if (!m_items.empty() && m_feedsLoaded)
     {
         /*
