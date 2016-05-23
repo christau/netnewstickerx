@@ -31,6 +31,7 @@ TickerWindow::TickerWindow(QWidget *parent) :
     //    setStyleSheet("background:transparent;");
     //    setAttribute(Qt::WA_TranslucentBackground);
     //    setWindowFlags(Qt::FramelessWindowHint);
+    setAcceptDrops(true);
     ui->setupUi(this);
     this->setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
     this->setMouseTracking(true);
@@ -626,6 +627,11 @@ void TickerWindow::paintEvent(QPaintEvent *pe)
     p.restore();
 }
 
+void TickerWindow::dragEnterEvent(QDragEnterEvent *e)
+{
+        e->acceptProposedAction();
+}
+
 void TickerWindow::dropEvent(QDropEvent * event)
 {
     QList<QUrl> list = event->mimeData()->urls();
@@ -733,8 +739,3 @@ void TickerWindow::configChanged(Configuration* cfg)
 {
     return;
 }
-
-
-
-
-
