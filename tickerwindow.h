@@ -55,7 +55,6 @@ private:
     bool mMoving;
     Ui::TickerWindow *ui;
     QTimer* m_pTimer;
-    QTimer* m_pMoveElapsedTimer;
 
 private slots:
     void animate();
