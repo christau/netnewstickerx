@@ -58,11 +58,6 @@ TickerWindow::TickerWindow(QWidget *parent) :
     m_border=Content;
     mMoving = false;
 
-    m_pMoveElapsedTimer = new QTimer(this);
-    //connect(m_pMoveElapsedTimer, SIGNAL(timeout()), SLOT(moveTimeoutElapsed()));
-    m_pMoveElapsedTimer->setInterval(500);
-    m_pMoveElapsedTimer->setSingleShot(true);
-
     m_colHoverFont = QColor::fromRgb(255, 0, 0);
 
     // myWidget is any QWidget-derived class
@@ -158,7 +153,7 @@ void TickerWindow::mouseMoveEvent(QMouseEvent* event)
     {
         m_border = getBorder(event->globalPos());
         Qt::CursorShape s = Qt::ArrowCursor;
-        if(m_border!=Content )
+        if(m_border!=Content)
         {
             switch(m_border)
             {
@@ -298,12 +293,6 @@ void TickerWindow::mouseReleaseEvent(QMouseEvent* event)
     }
 
     m_mouseXOffs = 0;
-    if (m_pMoveElapsedTimer->isActive())
-    {
-        m_pMoveElapsedTimer->stop();
-    }
-
-
 }
 
 void TickerWindow::initScrollTimer()
@@ -311,6 +300,7 @@ void TickerWindow::initScrollTimer()
     if (m_pTimer == 0)
     {
         m_pTimer = new QTimer(this);
+        m_pTimer->setTimerType(Qt::PreciseTimer);
         connect(m_pTimer, SIGNAL(timeout()), SLOT(animate()));
         m_pTimer->start(25);
     }
