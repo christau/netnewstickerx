@@ -95,6 +95,9 @@ void TickerWindow::ShowContextMenu(const QPoint& pos)
     QMenu myMenu;
     myMenu.addAction("Reload Feeds");
     myMenu.addAction("Configuration");
+    QAction* a = myMenu.addAction("Fix Window Position");
+    a->setCheckable(true);
+    a->setChecked(Configuration::getInstance()->m_fixWindowPos);
     myMenu.addSeparator();
     myMenu.addAction("Exit");
 
@@ -111,6 +114,14 @@ void TickerWindow::ShowContextMenu(const QPoint& pos)
             Configuration::getInstance()->m_windowPos = this->geometry();
             Configuration::getInstance()->saveConfiguration();
             exit(0);
+        }
+        else if(selectedItem->text()=="Fix Window Position")
+        {
+            bool fwp = selectedItem->isChecked();
+            selectedItem->setChecked(!fwp);
+            printf("fwp:%i\n", fwp);
+            Configuration::getInstance()->m_fixWindowPos = fwp;
+            Configuration::getInstance()->saveConfiguration();
         }
     }
     else
@@ -169,7 +180,7 @@ void TickerWindow::mouseMoveEvent(QMouseEvent* event)
         setCursor(s);
     }
 
-    if( event->buttons().testFlag(Qt::LeftButton) && mMoving && m_border==Content)
+    if( event->buttons().testFlag(Qt::LeftButton) && mMoving && m_border==Content && !Configuration::getInstance()->m_fixWindowPos)
     {
         this->move(this->pos() + (event->globalPos() - mLastMousePosition));
         mLastMousePosition = event->globalPos();

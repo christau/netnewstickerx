@@ -27,6 +27,7 @@ public:
      * @brief m_windowPos - Last poosition of the ticker window. Used to restore the position at restart
      */
     QRect m_windowPos;
+    bool m_fixWindowPos;
     QColor m_textColor;
     QColor m_bkgColor;
     QFont m_font;

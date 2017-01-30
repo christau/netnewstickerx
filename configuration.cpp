@@ -42,6 +42,7 @@ void Configuration::loadConfiguration()
     cfg->m_fontSize = settings.value("FontSize").toInt();
     cfg->m_feeds = settings.value("Feeds").value<QStringList>();
     cfg->m_windowPos = settings.value("WindowPos").value<QRect>();
+    cfg->m_fixWindowPos = settings.value("FixWindowPos").toBool();
 }
 
 void Configuration::saveConfiguration()
@@ -58,6 +59,7 @@ void Configuration::saveConfiguration()
     settings.setValue("FontSize", cfg->m_fontSize);
     settings.setValue("Feeds", cfg->m_feeds);
     settings.setValue("WindowPos", cfg->m_windowPos);
+    settings.setValue("FixWindowPos", cfg->m_fixWindowPos);
     settings.sync();
     emit configChanged(this);
 }
